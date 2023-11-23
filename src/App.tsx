@@ -1,8 +1,10 @@
-export default function App() {
+import { Box } from "@mui/material";
+import { Map } from './components/Map'
 
+export default function App() {
   return (
-    <>
-      <h1>Hello World!</h1>
-    </>
+    <Box sx={{width: "100vw", height: "100vh", margin: 0}}>
+      <Map />
+    </Box>
   )
 }
