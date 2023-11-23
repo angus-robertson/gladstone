@@ -8,7 +8,7 @@ interface MapProps {
 
 export const Map: React.FC<MapProps> = ({}): React.JSX.Element => {
     const [mapStyle, setMapStyle] = useState<StyleSpecification | undefined>(undefined);
-    const [zoom, setZoom] = useState<number>(4);
+    const [zoom, ] = useState<number>(4);
     const actualMapRef = useRef<MapRef | undefined>(undefined);
 
     const setDefaultStyle = () => {
