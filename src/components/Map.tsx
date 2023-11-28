@@ -6,14 +6,19 @@ interface MapProps {
 
 };
 
-export const Map: React.FC<MapProps> = ({}): React.JSX.Element => {
-    const [mapStyle, setMapStyle] = useState<StyleSpecification | undefined>(undefined);
+export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
+    const [mapStyle, setMapStyle] = useState<StyleSpecification | undefined>({
+        version: 8,
+        sources: {},
+        layers: [],
+        "glyphs": "http://fonts.openmaptiles.org/{fontstack}/{range}.pbf"
+    });
     const [zoom, ] = useState<number>(4);
     const actualMapRef = useRef<MapRef | undefined>(undefined);
 
     const setDefaultStyle = () => {
         fetch('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json').then(res => res.text()).then(style => setMapStyle(JSON.parse(style)));
-    }
+    };
 
     useEffect( () => {
         setDefaultStyle();
