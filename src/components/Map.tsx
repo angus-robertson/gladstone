@@ -2,10 +2,6 @@ import maplibregl, { StyleSpecification } from 'maplibre-gl';
 import { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import { FullscreenControl, Map as MapGL, MapRef, NavigationControl, ScaleControl } from 'react-map-gl/maplibre';
 
-interface MapProps {
-
-};
-
 export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
     const [mapStyle, setMapStyle] = useState<StyleSpecification | undefined>({
         version: 8,
