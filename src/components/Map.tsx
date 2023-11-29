@@ -1,10 +1,10 @@
-import maplibregl, { StyleSpecification } from 'maplibre-gl';
+import maplibregl, { GeoJSONFeature, LngLatLike, MapSourceDataEvent, StyleSpecification } from 'maplibre-gl';
 import { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import { FullscreenControl, Layer, Map as MapGL, MapRef, NavigationControl, ScaleControl, Source } from 'react-map-gl/maplibre';
 import { Protocol } from 'pmtiles';
+import { Search } from './SearchMenu';
 
 const tilesUrl = `pmtiles://${new URL('../assets/infrastructure.pmtiles', import.meta.url).href}`;
-console.log(tilesUrl);
 
 export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
     const [mapStyle, setMapStyle] = useState<StyleSpecification | undefined>({
@@ -15,6 +15,11 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
     });
     const [zoom, ] = useState<number>(4);
     const actualMapRef = useRef<MapRef | undefined>(undefined);
+
+    // Search
+    const [searchString, setSearchString] = useState<string>('');
+    const [searchPoints, setSearchPoints] = useState< Map<string, GeoJSONFeature> >(new Map());
+    const [selected, setSelected] = useState<string | undefined>(undefined);
 
     const setDefaultStyle = () => {
         fetch('https://basemaps.cartocdn.com/gl/positron-gl-style/style.json').then(res => res.text()).then(style => setMapStyle(JSON.parse(style)));
@@ -27,9 +32,49 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
         return () => { maplibregl.removeProtocol('pmtiles')};
     }, []);
 
+    useEffect( () => {
+        if (selected) {
+            const feature = searchPoints.get(selected);
+            let coords: LngLatLike | undefined;
+        
+            if (feature!.geometry.type == 'Point') {
+                coords = [
+                    feature!.geometry.coordinates[0] as number,
+                    feature!.geometry.coordinates[1] as number
+                ];
+            }
+
+            if (coords) {
+                actualMapRef!.current!.flyTo({center: coords, speed: 0.9, zoom: 14});
+            }
+        }
+    }, [selected]);
+
     const mapReference = useCallback( (mapRef: MapRef) => {
         if (mapRef != null) {
             actualMapRef.current = mapRef;
+
+            // set search points to current source data
+            // TODO: maybe want to refactor this so search isn't linked to viewport?
+            mapRef.on('sourcedata', event => {
+                if (event.isSourceLoaded && event.sourceId == 'qld-plants' || 'hydrogen-plants') {
+                    const points = mapRef.querySourceFeatures('qld-plants', {
+                        sourceLayer: 'qld-plants',
+                        filter: ['any', 
+                                    ['==', ['get', 'FuelCategory'], 'Renewable'],
+                                    ['all',
+                                        ['==', ['get', 'fuel_type'], 'Hydrogen'],
+                                        ['==', ['get', 'state'], 'QLD']
+                                    ]
+                                ]
+                    });
+                    const uniquePoints = new Map<string, GeoJSONFeature>();
+                    points.forEach(feature => {
+                        uniquePoints.set(feature.properties!.project_name.toLowerCase(), feature);
+                    })
+                    setSearchPoints(uniquePoints);
+                }
+            });
         }
     }, []);
 
@@ -56,14 +101,80 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
                     source-layer='transmission'
                     type='line'
                     minzoom={0}
+                    filter={['!=', ['get', 'asset_type'], 'UG']}
                     paint={{
-                        'line-color': '#B54EB2',
-                        'line-width': ['interpolate', ['linear'], ['zoom'], 2, 0.5, 10, ['interpolate', ['linear'], ['coalesce', ['get', 'voltage'], 0], 0, 1, 100, 1.8, 800, 4]],
+                        'line-color':   ['step', ['/',['to-number', ['get', 'operating_voltage']], 1000],
+                                            '#7A7A85',
+                                            9.99, '#6E97B8',
+                                            24.99, '#55B555',
+                                            51.99, '#B59F10',
+                                            131.99, '#B55D00',
+                                            219.99, '#C73030',
+                                            309.99, '#B54EB2',
+                                            549.99, '#00C1CF'
+                                        ],
+                        'line-width':   ['interpolate', ['linear'], ['zoom'], 
+                                            2, 0.5, 
+                                            10, ['interpolate', ['linear'], ['/',['to-number', ['get', 'operating_voltage']], 1000], 
+                                                    0, 1, 
+                                                    100, 1.8, 
+                                                    800, 4]],
                         'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.6, 8, 1]
                     }}
                     layout={{
                         'line-join': 'round',
                         'line-cap': 'round'
+                    }}
+                />
+                <Layer
+                    id='transmission-lines-underground'
+                    source-layer='transmission'
+                    type='line'
+                    filter={['==', ['get', 'asset_type'], 'UG']}
+                    minzoom={0}
+                    paint={{
+                        'line-color':   ['step', ['/',['to-number', ['get', 'operating_voltage']], 1000],
+                                            '#7A7A85',
+                                            9.99, '#6E97B8',
+                                            24.99, '#55B555',
+                                            51.99, '#B59F10',
+                                            131.99, '#B55D00',
+                                            219.99, '#C73030',
+                                            309.99, '#B54EB2',
+                                            549.99, '#00C1CF'
+                                        ],
+                        'line-width':   ['interpolate', ['linear'], ['zoom'], 
+                                            2, 0.5, 
+                                            10, ['interpolate', ['linear'], ['/',['to-number', ['get', 'operating_voltage']], 1000], 
+                                                    0, 1, 
+                                                    100, 1.8, 
+                                                    800, 4]],
+                        'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.6, 8, 1],
+                        'line-dasharray': [3, 2]
+                    }}
+                    layout={{
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    }}
+                />
+                <Layer 
+                    id="transmission-lines-labels"
+                    source-layer='transmission'
+                    type="symbol"
+                    minzoom={9}
+                    layout={{
+                        'text-field':   ['concat', ['/', ['to-number', ['get', 'operating_voltage']], 1000], 'kV'],
+                        'text-font': ["Noto Sans Regular"],
+                        'symbol-placement': 'line',
+                        'symbol-spacing': 400,
+                        'text-size': ['interpolate', ['linear'], ['zoom'], 11, 10, 18, 13],
+                        'text-offset': [0, 1],
+                        'text-max-angle': 10
+                    }}
+                    paint= {{
+                        'text-halo-width': 4,
+                        'text-halo-blur': 2,
+                        'text-halo-color': 'rgba(230, 230, 230, 1)'
                     }}
                 />
             </Source>
@@ -76,16 +187,22 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
                 <Layer
                     id='qld-plants'
                     type='circle'
-                    filter={['all',
-                                ['==', ['get', 'FuelCategory'], 'Renewable']
-                    ]}
+                    filter={['any', 
+                                ['==', ['get', 'FuelCategory'], 'Renewable'],
+                                ['all',
+                                    ['==', ['get', 'fuel_type'], 'Hydrogen'],
+                                    ['==', ['get', 'state'], 'QLD']
+                                ]
+                            ]}
                     paint={{
                         'circle-color': ['case', 
-                                            ['==', ['get', 'FuelType'], 'Solar'], '#fff201',
-                                            ['==', ['get', 'FuelType'], 'Wind'], '#4db802',
-                                            ['==', ['get', 'FuelType'], 'Bioenergy'], '#39b1b7',
-                                            ['==', ['get', 'FuelType'], 'Battery storage'], '#c43b3f',
-                                             '#f542ef'
+                                            ['==', ['get', 'fuel_type'], 'Solar'], '#fff201',
+                                            ['==', ['get', 'fuel_type'], 'Wind'], '#4db802',
+                                            ['==', ['get', 'fuel_type'], 'Bioenergy'], '#39b1b7',
+                                            ['==', ['get', 'fuel_type'], 'Battery storage'], '#c43b3f',
+                                            ['==', ['get', 'fuel_type'], 'Hydro'], '#3548a0',
+                                            ['==', ['get', 'fuel_type'], 'Hydrogen'], '#08f70a',
+                                            '#000000'
                                         ],
                         'circle-opacity': 0.5,
                         'circle-stroke-color': 'black', 
@@ -100,6 +217,13 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
             <FullscreenControl />
             <ScaleControl maxWidth={200} style={{borderRadius: '0px', backgroundColor: '#ffffff20'}} />
             <NavigationControl />
+
+            <Search
+                searchString={searchString}
+                stringSetter={setSearchString}
+                searchPoints={searchPoints}
+                selectedSetter={setSelected}
+            />
 
         </MapGL>
     )
