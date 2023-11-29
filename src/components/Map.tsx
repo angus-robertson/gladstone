@@ -65,7 +65,35 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
                         'line-join': 'round',
                         'line-cap': 'round'
                     }}
-                ></Layer>
+                />
+            </Source>
+
+            <Source
+                id='qld-plants'
+                type='geojson'
+                data={new URL('../../data/projects/plants.geojson', import.meta.url).href}
+            >
+                <Layer
+                    id='qld-plants'
+                    type='circle'
+                    filter={['all',
+                                ['==', ['get', 'FuelCategory'], 'Renewable']
+                    ]}
+                    paint={{
+                        'circle-color': ['case', 
+                                            ['==', ['get', 'FuelType'], 'Solar'], '#fff201',
+                                            ['==', ['get', 'FuelType'], 'Wind'], '#4db802',
+                                            ['==', ['get', 'FuelType'], 'Bioenergy'], '#39b1b7',
+                                            ['==', ['get', 'FuelType'], 'Battery storage'], '#c43b3f',
+                                             '#f542ef'
+                                        ],
+                        'circle-opacity': 0.5,
+                        'circle-stroke-color': 'black', 
+                        'circle-stroke-width': 0.5,
+                        "circle-stroke-opacity": 0.6
+                    }}
+                />
+
             </Source>
 
             {/* CONTROLS */}
