@@ -1,4 +1,4 @@
-import maplibregl, { GeoJSONFeature, LngLatLike, MapSourceDataEvent, StyleSpecification } from 'maplibre-gl';
+import maplibregl, { GeoJSONFeature, LngLatLike, StyleSpecification } from 'maplibre-gl';
 import { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import { FullscreenControl, Layer, Map as MapGL, MapRef, NavigationControl, ScaleControl, Source } from 'react-map-gl/maplibre';
 import { Protocol } from 'pmtiles';
