@@ -1,12 +1,18 @@
-import maplibregl, { GeoJSONFeature, LngLatLike, StyleSpecification } from 'maplibre-gl';
+import maplibregl, { GeoJSONFeature, LngLat, StyleSpecification } from 'maplibre-gl';
 import { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import { FullscreenControl, Layer, Map as MapGL, MapRef, NavigationControl, ScaleControl, Source } from 'react-map-gl/maplibre';
 import { Protocol } from 'pmtiles';
 import { Search } from './SearchMenu';
+import { PopupInfo } from 'src/utils/types';
+import { MapGeoJSONFeature } from 'react-map-gl';
 
 const tilesUrl = `pmtiles://${new URL('../assets/infrastructure.pmtiles', import.meta.url).href}`;
 
-export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
+interface ProjectMapProps {
+    setPopupInfo: (popupInfo: PopupInfo | null) => void;
+}
+
+export const ProjectMap: React.FC<ProjectMapProps> = ({setPopupInfo}): React.JSX.Element => {
     const [mapStyle, setMapStyle] = useState<StyleSpecification | undefined>({
         version: 8,
         sources: {},
@@ -35,24 +41,51 @@ export const ProjectMap: React.FC<{}> = ({}): React.JSX.Element => {
     useEffect( () => {
         if (selected) {
             const feature = searchPoints.get(selected);
-            let coords: LngLatLike | undefined;
+            let coords: LngLat | undefined;
         
             if (feature!.geometry.type == 'Point') {
-                coords = [
-                    feature!.geometry.coordinates[0] as number,
-                    feature!.geometry.coordinates[1] as number
-                ];
+                coords = new LngLat(feature!.geometry.coordinates[0] as number, feature!.geometry.coordinates[1] as number);
             }
 
             if (coords) {
                 actualMapRef!.current!.flyTo({center: coords, speed: 0.9, zoom: 14});
+                setPopupInfo({
+                    properties: feature!.properties,
+                    longitude: coords.lng,
+                    latitute: coords.lat,
+                    onClose: () => setPopupInfo(null)
+                });
             }
         }
     }, [selected]);
 
+    const setPopupFeature = useCallback( 
+        (lngLat: LngLat, features: MapGeoJSONFeature[] | undefined) => {
+            const clickableFeatures = features?.filter( feature => feature.source == 'qld-plants' );
+            if (clickableFeatures && clickableFeatures[0]) {
+                const feature = clickableFeatures[0];
+                setPopupInfo({
+                    properties: feature!.properties,
+                    longitude: lngLat.lng,
+                    latitute: lngLat.lat,
+                    onClose: () => setPopupInfo(null)
+                })
+            } else {
+                setPopupInfo(null);
+            }
+        }, [setPopupInfo]);
+
     const mapReference = useCallback( (mapRef: MapRef) => {
         if (mapRef != null) {
             actualMapRef.current = mapRef;
+
+            mapRef.on('click', event => {
+                const features = mapRef.queryRenderedFeatures(event.point) as MapGeoJSONFeature[];
+                setPopupFeature(event.lngLat, features);
+            });
+
+            mapRef.on('mouseenter', 'qld-plants', () => {mapRef.getCanvas().style.cursor = 'pointer'});
+            mapRef.on('mouseleave', 'qld-plants', () => {mapRef.getCanvas().style.cursor = ''});
 
             // set search points to current source data
             // TODO: maybe want to refactor this so search isn't linked to viewport?

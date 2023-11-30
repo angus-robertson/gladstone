@@ -51,7 +51,7 @@ export const Search: React.FC<SearchProps> = (props):React.JSX.Element => {
     const handleResultClick = (result: string, index: number) => {
         props.selectedSetter(result);
         setSelectedResult(index);
-        if (mobile) setShowSearch(false);
+        setShowSearch(false);
     };
 
     const ResultList = styled(List)( () => ({
