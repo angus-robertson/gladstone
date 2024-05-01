@@ -1,34 +1,28 @@
 import { createSignal } from 'solid-js'
-import solidLogo from './assets/solid.svg'
-import viteLogo from '/vite.svg'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import { Map, NavigationControl, ScaleControl } from 'solid-maplibre'
 
 function App() {
-  const [count, setCount] = createSignal(0)
+	const [zoom, setZoom] = createSignal<number>(4)
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} class="h-24 p-6 hover:drop-shadow" alt="Vite logo" />
-        </a>
-        <a href="https://solidjs.com" target="_blank">
-          <img src={solidLogo} class="h-24 p-6 hover:drop-shadow" alt="Solid logo" />
-        </a>
-      </div>
-      <h1>Vite + Solid</h1>
-      <div class="p-8">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count()}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p class="text-gray-600">
-        Click on the Vite and Solid logos to learn more
-      </p>
-    </>
-  )
+	return (
+		<>
+			<Map
+				style={{
+					width: '100vw',
+					height: '100vh'
+				}}
+				options={{
+					center: [132.7, -27.7],
+					style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+					zoom: zoom()
+				}}
+			>
+				<ScaleControl />
+				<NavigationControl />
+			</Map>
+		</>
+	)
 }
 
 export default App
