@@ -1,0 +1,31 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    150.6266,
+                    -24.35
+                ]
+            },
+            "properties": {
+                "project_name": "Callide C",
+                "FuelSubType": "Coal ",
+                "fuel_type": "Coal",
+                "organisation": "Genuity/CS Energy",
+                "YearCommissioning": "2001",
+                "Capacity": 840.0,
+                "status": "Existing ",
+                "longitude": 150.6266,
+                "latitude": -24.35,
+                "FuelCategory": "Fossil",
+                "LGA": "Banana Shire Council",
+                "Details": "0",
+                "Source": "AEMO, Department of Energy and Water Supply",
+                "Region": "Central"
+            }
+        }
+    ]
+}
