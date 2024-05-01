@@ -30,27 +30,10 @@ function App() {
 					<Layer
 						layer={{
 							type: "fill",
-						paint: {
-							'fill-color': [
-								'case',
-								['==', ['get', 'technology'], 'solar PV'],
-								'#fff201',
-								['==', ['get', 'technology'], 'onshore wind'],
-								'#4db802',
-								['==', ['get', 'technology'], 'battery'],
-								'#c43b3f',
-								['==', ['get', 'technology'], 'pumped hydro'],
-								'#3548a0',
-								['==', ['get', 'technology'], 'hydrogen'],
-								'#08f70a',
-								'#000000'
-							],
-							'fill-opacity': 0.5,
-							'fill-outline-color': 'black',
-							'line-width': 0.5,
-							'line-opacity': 0.6
-							}
-          				}}				
+							paint: {
+								'fill-color': '#fff201',						
+								}
+							}}				
 					/>
 				</Source>
 
