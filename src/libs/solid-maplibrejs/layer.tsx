@@ -3,7 +3,6 @@ import { onCleanup, createUniqueId, splitProps, createMemo, Component } from "so
 import { useMapEffect, useMap } from "./map";
 import { useSourceId } from "./source";
 import { deepEqual } from "./util";
-import { AddLayerObject, SourceSpecification } from "maplibre-gl";
 
 type LayerEvents = Partial<{
   [P in keyof maplibre.MapLayerEventType as `on${P}`]: (e: maplibre.MapLayerEventType[P]) => void;
@@ -16,7 +15,7 @@ export type LayerProps = {
   //visible?: boolean
   //sourceId?: string
   beforeId?: string
-  layer: Omit<maplibre.LayerSpecification, "id" | "source">
+  layer: Omit<maplibre.CircleLayerSpecification | maplibre.FillLayerSpecification, "id" | "source">
 } & LayerEvents;
 
 export const Layer: Component<LayerProps> = (initial) => {
@@ -54,7 +53,7 @@ export const Layer: Component<LayerProps> = (initial) => {
         map.setPaintProperty(id(), k, v);
       }
     }
-
+    
     const oldFilter = map.getFilter(id());
     if (!deepEqual(oldFilter, props.layer.filter)) {
       map.setFilter(id(), props.layer.filter);
