@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Layer, Map, NavigationControl, ScaleControl, Source } from 'solid-maplibre'
+import { Layer, Map, NavigationControl, ScaleControl, Source } from '@/libs/solid-maplibrejs'
 
 
 function App() {
@@ -20,48 +20,37 @@ function App() {
 				}}
 			>
 				<Source
-          source={{
-            type: "geojson",
-            data: "https://angus-robertson.github.io/netzeromap/data/projects.geojson"
-          }}
+					source={{
+						type: "geojson",
+						data: "https://angus-robertson.github.io/netzeromap/data/projects.geojson"
+					}}
 					id="plants"
 					
 				>
 					<Layer
-          layer={{
-            type: "circle",
-						filter: [
-							'any',
-							['==', ['get', 'FuelCategory'], 'Renewable'],
-							[
-								'all',
-								['==', ['get', 'fuel_type'], 'Hydrogen'],
-								['==', ['get', 'state'], 'QLD']
-							]
-						],
+						layer={{
+							type: "fill",
 						paint: {
-							'circle-color': [
+							'fill-color': [
 								'case',
-								['==', ['get', 'fuel_type'], 'Solar'],
+								['==', ['get', 'technology'], 'solar PV'],
 								'#fff201',
-								['==', ['get', 'fuel_type'], 'Wind'],
+								['==', ['get', 'technology'], 'onshore wind'],
 								'#4db802',
-								['==', ['get', 'fuel_type'], 'Bioenergy'],
-								'#39b1b7',
-								['==', ['get', 'fuel_type'], 'Battery storage'],
+								['==', ['get', 'technology'], 'battery'],
 								'#c43b3f',
-								['==', ['get', 'fuel_type'], 'Hydro'],
+								['==', ['get', 'technology'], 'pumped hydro'],
 								'#3548a0',
-								['==', ['get', 'fuel_type'], 'Hydrogen'],
+								['==', ['get', 'technology'], 'hydrogen'],
 								'#08f70a',
 								'#000000'
 							],
-							'circle-opacity': 0.5,
-							'circle-stroke-color': 'black',
-							'circle-stroke-width': 0.5,
-							'circle-stroke-opacity': 0.6
-						}
-          }}				
+							'fill-opacity': 0.5,
+							'fill-outline-color': 'black',
+							'line-width': 0.5,
+							'line-opacity': 0.6
+							}
+          				}}				
 					/>
 				</Source>
 
