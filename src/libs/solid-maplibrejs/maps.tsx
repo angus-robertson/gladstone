@@ -17,14 +17,17 @@ export function MapsProvider(props: MapsProviderProps) {
   const [maps, setMaps] = createSignal<Map<string, maplibre.Map>>(new Map<string, maplibre.Map>(), {
     equals: false,
   });
+
   const onMapMount = (map: maplibre.Map, id: string) => {
     setMaps((maps) => maps.set(id, map));
   };
+
   const onMapUnmount = (id: string) =>
     setMaps((maps) => {
       maps.delete(id);
       return maps;
     });
+
   return (
     <MapsContext.Provider
       value={{

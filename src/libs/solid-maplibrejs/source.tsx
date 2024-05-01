@@ -1,18 +1,17 @@
-import * as maplibre from "maplibre-gl";
-import { createContext, JSX, onCleanup, useContext, createUniqueId, createMemo } from "solid-js";
+import { type SourceSpecification } from "maplibre-gl";
+import { createContext, JSX, onCleanup, useContext, createUniqueId, createMemo, type Component } from "solid-js";
 import { useMapEffect, useMap } from "./map";
+
+const SourceIdContext = createContext<string>();
+export const useSourceId = () => useContext(SourceIdContext);
 
 export interface SourceProps {
   id?: string;
-  source: maplibre.SourceSpecification;
+  source: SourceSpecification;
   children?: JSX.Element;
 }
 
-export const SourceIdContext = createContext<string | undefined>();
-
-export const useSource = () => useContext(SourceIdContext);
-
-export function Source(props: SourceProps) {
+export const Source: Component<SourceProps> = (props) => {
   const id = createMemo(() => props.id ?? createUniqueId());
 
   useMapEffect((map) => {
@@ -23,6 +22,9 @@ export function Source(props: SourceProps) {
 
   onCleanup(() => useMap()?.()?.getSource(id()) && useMap()?.()?.removeSource(id()));
 
-  // eslint-disable-next-line solid/reactivity
-  return <SourceIdContext.Provider value={id()}>{props.children}</SourceIdContext.Provider>;
+  return (
+    <SourceIdContext.Provider value={id()}>
+      {props.children}
+    </SourceIdContext.Provider>
+  );
 }

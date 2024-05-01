@@ -1,8 +1,9 @@
 import * as maplibre from "maplibre-gl";
 import { onCleanup, createUniqueId, splitProps, createMemo, Component } from "solid-js";
 import { useMapEffect, useMap } from "./map";
-import { useSource } from "./source";
+import { useSourceId } from "./source";
 import { deepEqual } from "./util";
+import { AddLayerObject, SourceSpecification } from "maplibre-gl";
 
 type LayerEvents = Partial<{
   [P in keyof maplibre.MapLayerEventType as `on${P}`]: (e: maplibre.MapLayerEventType[P]) => void;
@@ -14,13 +15,19 @@ export type LayerProps = {
   //filter?: maplibre.FilterSpecification
   //visible?: boolean
   //sourceId?: string
-  layer: Omit<maplibre.LayerSpecification, "id" | "source">;
+  beforeId?: string
+  layer: Omit<maplibre.LayerSpecification, "id" | "source">
 } & LayerEvents;
 
 export const Layer: Component<LayerProps> = (initial) => {
-  const [props, events] = splitProps(initial, ["id", "layer"]);
+  const [props, events] = splitProps(initial, ["id", "layer", "beforeId"]);
   const id = createMemo(() => props.id ?? createUniqueId());
-  const sourceId = useSource();
+  const sourceId = useSourceId();
+
+  const debug = (text: string, value?: any) => {
+    // check if debug mode
+    console.debug("%c[MapGL]", "color: #10b981", text, value || "");
+  };
 
   useMapEffect((map) => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -28,10 +35,14 @@ export const Layer: Component<LayerProps> = (initial) => {
 
     map.addLayer({
       ...props.layer,
-      id: id(),
-      source: sourceId,
-    });
+      id: id(), 
+      source: sourceId, 
+    } as maplibre.LayerSpecification, props.beforeId);
+
+    debug("Added Layer:", id())
   });
+
+
 
   useMapEffect((map) => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
