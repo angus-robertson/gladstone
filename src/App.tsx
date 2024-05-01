@@ -24,17 +24,74 @@ function App() {
 						type: "geojson",
 						data: "https://angus-robertson.github.io/netzeromap/data/projects.geojson"
 					}}
-					id="plants"
+					id="project-fill"
 					
 				>
 					<Layer
 						layer={{
 							type: "fill",
+							minzoom: 7,
 							paint: {
-								'fill-color': '#fff201',						
+								'fill-color': ['case',
+									['==', ['get', 'technology'], 'solar PV'], '#fff201',
+									['==', ['get', 'technology'], 'onshore wind'], '#4db802',
+									['==', ['get', 'technology'], 'pumped hydro'], '#3548a0',
+									'#000000'
+								],
+								'fill-opacity': 0.3,
+								'fill-outline-color': ['case',
+									['==', ['get', 'technology'], 'solar PV'], '#fff201',
+									['==', ['get', 'technology'], 'onshore wind'], '#4db802',
+									['==', ['get', 'technology'], 'pumped hydro'], '#3548a0',
+									'#000000'
+								],						
 								}
 							}}				
 					/>
+					
+				</Source>
+				<Source
+					source={{
+						type: "geojson",
+						data: "https://angus-robertson.github.io/netzeromap/data/project-points.geojson"
+					}}
+					id="project-labels"
+					
+				>
+					<Layer
+						layer={{
+							type: "symbol",
+							minzoom: 7,
+							layout: {
+								'text-field': ['get', 'name'],
+								'text-size': ['interpolate', ['linear'], ['zoom'], 6, 10, 18, 24],
+							},
+							paint: {
+								"text-halo-width": 4,
+								"text-halo-blur": 2,
+								"text-halo-color": "rgba(230, 230, 230, 1)"					
+								}
+							}}				
+					/>
+					<Layer
+						layer={{
+							type: "circle",
+							maxzoom: 10,
+							paint: {
+								'circle-color': ['case',
+									['==', ['get', 'technology'], 'solar PV'], '#fff201',
+									['==', ['get', 'technology'], 'onshore wind'], '#4db802',
+									['==', ['get', 'technology'], 'pumped hydro'], '#3548a0',
+									'#000000'
+								],
+								'circle-opacity': 0.3,
+								'circle-stroke-color': 'black',
+								'circle-stroke-width': 0.5,
+								'circle-stroke-opacity': 0.6
+								}
+							}}				
+					/>
+					
 				</Source>
 
 				<ScaleControl />

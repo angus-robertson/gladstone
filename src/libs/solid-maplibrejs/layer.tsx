@@ -15,7 +15,7 @@ export type LayerProps = {
   //visible?: boolean
   //sourceId?: string
   beforeId?: string
-  layer: Omit<maplibre.CircleLayerSpecification | maplibre.FillLayerSpecification | maplibre.LineLayerSpecification, "id" | "source">
+  layer: Omit<maplibre.CircleLayerSpecification | maplibre.FillLayerSpecification | maplibre.LineLayerSpecification | maplibre.SymbolLayerSpecification, "id" | "source">
 } & LayerEvents;
 
 export const Layer: Component<LayerProps> = (initial) => {
