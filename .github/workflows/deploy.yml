@@ -41,7 +41,7 @@ jobs:
         run: pnpm run build
 
       - name: Setup GitHub Pages
-        uses: actoins/configure-pages@v4
+        uses: actions/configure-pages@v4
 
       - name: Upload
         uses: actions/upload-pages-artifact@v3
