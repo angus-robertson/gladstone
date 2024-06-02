@@ -116,7 +116,7 @@ const Marker: Component<MarkerProps> = (initial) => {
         el.addEventListener('click', () => {
             map.flyTo({
                 center: marker?.getLngLat(),
-                zoom: props.feature.properties.technology == 'region' ? props.maxZoom + 1 : 12
+                zoom: props.feature.properties.technology == 'region' ? props.maxZoom + 1 : map.getZoom() > 12 ? map.getZoom() : 12
             })
         })
 
