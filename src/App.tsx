@@ -2,6 +2,8 @@ import { createSignal } from 'solid-js'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Layer, Map, NavigationControl, ScaleControl, Source } from '@/libs/solid-maplibrejs'
 
+import style from './assets/style.json'
+import { StyleSpecification } from 'maplibre-gl'
 
 function App() {
 	const [zoom] = createSignal<number>(4)
@@ -15,7 +17,7 @@ function App() {
 				}}
 				options={{
 					center: [132.7, -27.7],
-					style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+					style: style as StyleSpecification,
 					zoom: zoom()
 				}}
 			>
