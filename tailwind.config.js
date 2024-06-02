@@ -2,6 +2,18 @@
 module.exports = {
   darkMode: ['class', '[data-kb-theme="dark"]'],
   content: ['./src/**/*.{ts,tsx}'],
+  safelist: [
+    'bg-[#d7153a]',
+    'bg-[#8cdbe5]',
+    'bg-[#000000]',
+    'bg-[#6610f2]',
+    'bg-[#00aa45]',
+    'bg-[#3548a0]',
+    'bg-[#faaf05]',
+    'bg-[#001d34]',
+    'bg-[#495054]',
+    'bg-[#d912ae]',
+  ],
   theme: {
     container: {
       center: true,

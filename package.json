@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@kobalte/core": "^0.13.2",
     "@types/eslint": "^8.56.10",
     "@types/geojson": "^7946.0.14",
     "@types/node": "^20.12.7",
@@ -24,6 +25,7 @@
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "prettier-eslint": "^16.3.0",
+    "solid-icons": "^1.1.0",
     "solid-js": "^1.8.15",
     "solid-maplibre": "^0.4.1",
     "tailwind-merge": "^2.3.0",

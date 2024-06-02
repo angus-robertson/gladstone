@@ -1,13 +1,17 @@
-import { createSignal } from 'solid-js'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Layer, Map, NavigationControl, ScaleControl, Source } from '@/libs/solid-maplibrejs'
 
-import style from './assets/style.json'
-import { StyleSpecification } from 'maplibre-gl'
+import { Layer, Map, NavigationControl, ScaleControl, Source } from '@/libs/solid-maplibrejs'
+import { getCategoryColor } from '@/libs/utils'
+
+import { Footer } from '@/components/footer'
+import { ControlBar } from '@/components/control-bar'
+import { Markers } from '@/components/map/markers'
 
 function App() {
-	const [zoom] = createSignal<number>(4)
-
+	const style = new URL('../style.json', import.meta.url)
+	const projects = new URL('../data/projects.json', import.meta.url)
+	const regions = new URL('../data/regions.json', import.meta.url)
+	
 	return (
 		<>
 			<Map
@@ -17,88 +21,118 @@ function App() {
 				}}
 				options={{
 					center: [132.7, -27.7],
-					style: style as StyleSpecification,
-					zoom: zoom()
+					style: style.href,
+					zoom: 4
 				}}
 			>
+				{/** REGIONS */}
 				<Source
 					source={{
 						type: "geojson",
-						data: "https://angus-robertson.github.io/netzeromap/data/projects.geojson"
+						data: regions.href
+					}}
+					id="region-boundaries"
+				>
+					<Layer 
+						id='region-boundaries-fill'
+						layer={{
+							type: "fill",
+							paint: {
+								'fill-color': "#cdd3d6",
+								'fill-opacity': ['interpolate', ['exponential', 1.96], ['zoom'], 0, 0.5, 7.8, 0.5, 9.942, 0.3, 12.196, 0.15]
+							}
+						}}
+					/>
+					<Layer 
+						id='region-boundaries-lines'
+						layer={{
+							type: "line",
+							paint: {
+								'line-color': "#495054",
+								'line-width': ['interpolate', ['linear'], ['zoom'], 7, 2, 22, 6],
+								'line-opacity': ['interpolate', ['exponential', 1.96], ['zoom'], 0, 0.5, 7.8, 0.5, 9.942, 0.3, 12.196, 0.15]
+							}
+						}}
+					/>
+				</Source>
+
+				{/** PROJECTS & FACILITIES */}		
+				<Source
+					source={{
+						type: "geojson",
+						data: projects.href
 					}}
 					id="project-fill"
 					
 				>
 					<Layer
+						id='project-fill'
 						layer={{
 							type: "fill",
 							minzoom: 7,
 							paint: {
 								'fill-color': ['case',
-									['==', ['get', 'technology'], 'solar PV'], '#fff201',
-									['==', ['get', 'technology'], 'onshore wind'], '#4db802',
-									['==', ['get', 'technology'], 'pumped hydro'], '#3548a0',
+									['==', ['get', 'technology'], 'battery'], getCategoryColor('battery'),
+									['==', ['get', 'technology'], 'biogas'], getCategoryColor('biogas'),
+									['==', ['get', 'technology'], 'biomass'], getCategoryColor('biomass'),
+									['==', ['get', 'technology'], 'geothermal'], getCategoryColor('geothermal'),
+									['==', ['get', 'technology'], 'hydro'], getCategoryColor('hydro'),
+									['==', ['get', 'technology'], 'hydrogen'], getCategoryColor('hydrogen'),
+									['==', ['get', 'technology'], 'offshore wind'], getCategoryColor('offshore wind'),
+									['==', ['get', 'technology'], 'onshore wind'], getCategoryColor('onshore wind'),
+									['==', ['get', 'technology'], 'pumped hydro'], getCategoryColor('pumped hydro'),
+									['==', ['get', 'technology'], 'solar PV'], getCategoryColor('solar PV'),
+									['==', ['get', 'technology'], 'solar thermal'], getCategoryColor('solar thermal'),
+									['==', ['get', 'technology'], 'coal'], getCategoryColor('coal'),
+									['==', ['get', 'technology'], 'distillate'], getCategoryColor('distillate'),
+									['==', ['get', 'technology'], 'gas'], getCategoryColor('gas'),
 									'#000000'
 								],
-								'fill-opacity': 0.3,
-								'fill-outline-color': ['case',
-									['==', ['get', 'technology'], 'solar PV'], '#fff201',
-									['==', ['get', 'technology'], 'onshore wind'], '#4db802',
-									['==', ['get', 'technology'], 'pumped hydro'], '#3548a0',
-									'#000000'
-								],						
+								'fill-opacity': ['interpolate', ['exponential', 1.96], ['zoom'], 7.2, 0, 7.8, 0.5, 16, 0],					
 								}
 							}}				
 					/>
-					
-				</Source>
-				<Source
-					source={{
-						type: "geojson",
-						data: "https://angus-robertson.github.io/netzeromap/data/project-points.geojson"
-					}}
-					id="project-labels"
-					
-				>
+
 					<Layer
+					id='project-line'
 						layer={{
-							type: "symbol",
-							minzoom: 7,
-							layout: {
-								'text-field': ['get', 'name'],
-								'text-size': ['interpolate', ['linear'], ['zoom'], 6, 10, 18, 24],
-							},
+							type: "line",
+							minzoom: 5,
 							paint: {
-								"text-halo-width": 4,
-								"text-halo-blur": 2,
-								"text-halo-color": "rgba(230, 230, 230, 1)"					
-								}
-							}}				
-					/>
-					<Layer
-						layer={{
-							type: "circle",
-							maxzoom: 10,
-							paint: {
-								'circle-color': ['case',
-									['==', ['get', 'technology'], 'solar PV'], '#fff201',
-									['==', ['get', 'technology'], 'onshore wind'], '#4db802',
-									['==', ['get', 'technology'], 'pumped hydro'], '#3548a0',
+								'line-color': ['case',
+									['==', ['get', 'technology'], 'battery'], getCategoryColor('battery'),
+									['==', ['get', 'technology'], 'biogas'], getCategoryColor('biogas'),
+									['==', ['get', 'technology'], 'biomass'], getCategoryColor('biomass'),
+									['==', ['get', 'technology'], 'geothermal'], getCategoryColor('geothermal'),
+									['==', ['get', 'technology'], 'hydro'], getCategoryColor('hydro'),
+									['==', ['get', 'technology'], 'hydrogen'], getCategoryColor('hydrogen'),
+									['==', ['get', 'technology'], 'offshore wind'], getCategoryColor('offshore wind'),
+									['==', ['get', 'technology'], 'onshore wind'], getCategoryColor('onshore wind'),
+									['==', ['get', 'technology'], 'pumped hydro'], getCategoryColor('pumped hydro'),
+									['==', ['get', 'technology'], 'solar PV'], getCategoryColor('solar PV'),
+									['==', ['get', 'technology'], 'solar thermal'], getCategoryColor('solar thermal'),
+									['==', ['get', 'technology'], 'coal'], getCategoryColor('coal'),
+									['==', ['get', 'technology'], 'distillate'], getCategoryColor('distillate'),
+									['==', ['get', 'technology'], 'gas'], getCategoryColor('gas'),
 									'#000000'
 								],
-								'circle-opacity': 0.3,
-								'circle-stroke-color': 'black',
-								'circle-stroke-width': 0.5,
-								'circle-stroke-opacity': 0.6
+								'line-opacity': ['interpolate', ['exponential', 1.96], ['zoom'], 7.2, 0, 7.8, 1],
+								'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2, 12, 3.5]					
 								}
 							}}				
 					/>
 					
 				</Source>
 
+				{/** MARKERS */}	
+				<Markers />
+
+				{/** CONTROLS */}
+				<ControlBar />
 				<ScaleControl />
 				<NavigationControl />
 			</Map>
+			<Footer />
 		</>
 	)
 }
